@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="smallPadding">8dp</dimen>
+    <dimen name="padding">16dp</dimen>
+    <dimen name="largeMargin">32dp</dimen>
+    <dimen name="margin">8dp</dimen>
+    <dimen name="smallTextSize">20sp</dimen>
+    <dimen name="textSize">28sp</dimen>
+    <dimen name="largeTextSize">24sp</dimen>
+    <dimen name="cardSize">80dp</dimen>
+    <dimen name="columnWidth">200dp</dimen>
+    <dimen name="optionsDim">40dp</dimen>
+</resources>
