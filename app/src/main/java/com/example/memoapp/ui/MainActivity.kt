@@ -14,8 +14,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.memoapp.R
 import com.example.memoapp.databinding.ActivityMainBinding
 import com.example.memoapp.helper.SharedPrefs
+import com.example.memoapp.helper.onClick
+import com.example.memoapp.helper.secondsToTime
 import com.example.memoapp.model.Level
 import com.example.memoapp.model.Level.Companion.getLevel
+import com.example.memoapp.model.MusicState
+import com.example.memoapp.model.TimerState
+import com.example.memoapp.service.*
 import com.example.memoapp.ui.adapter.IconAdapter
 import com.example.memoapp.viewmodel.MainViewModel
 
@@ -36,10 +41,10 @@ class MainActivity : AppCompatActivity() {
     private val alertBuilder by lazy { AlertDialog.Builder(this) }
     private val handler by lazy { Handler(Looper.getMainLooper()) }
 
-    private val timereReceiver: TimerReceiver by lazy { TimerReceiver() }
+    private val timerReceiver: TimerReceiver by lazy { TimerReceiver() }
 
     inner class TimerReceiver : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
+        override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == TIMER_ACTION) updateUi(intent.getIntExtra(NOTIFICATION_TEXT, 0))
         }
     }
@@ -83,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
 
         if (!mainViewModel.isReceiverRegistered) {
-            registerReceiver(timereReceiver, IntentFilter(TIMER_ACTION))
+            registerReceiver(timerReceiver, IntentFilter(TIMER_ACTION))
             mainViewModel.isReceiverRegistered = true
         }
     }
@@ -91,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         if (mainViewModel.isReceiverRegistered) {
-            unregisterReceiver(timereReceiver)
+            unregisterReceiver(timerReceiver)
             mainViewModel.isReceiverRegistered = false
         }
     }
@@ -142,7 +147,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getServiceIntent(command: TimerState) =
-        Intent(this, TimerService::class.java).apply{
+        Intent(this, TimerService::class.java).apply {
             putExtra(SERVICE_COMMAND, command as Parcelable)
         }
 
@@ -176,7 +181,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateVisibility() {
-        with (binding) {
+        with(binding) {
             val btnPlayVisible = if (mainViewModel.isForegroundServiceRunning) {
                 View.INVISIBLE
             } else {
@@ -200,8 +205,8 @@ class MainActivity : AppCompatActivity() {
             btnQuit.visibility = gridVisible
         }
     }
-
-    private fun prepareCardView () {
+    
+    private fun prepareCardView() {
         val currentLevel = getLevel(sharedPrefs.getStoredLevel()) ?: Level.BEGINNER
 
         mainViewModel.pairs = 0
@@ -213,7 +218,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun enableButtons(state: MusicState) {
-        val songPlays = state == MusicState.PLAY || MusicState.SHUFFLE_SONGS
+        val songPlays = state == MusicState.PLAY || state == MusicState.SHUFFLE_SONGS
         with(binding) {
             btnPlayMusic.isEnabled = !songPlays
             btnPauseMusic.isEnabled = songPlays
@@ -246,7 +251,7 @@ class MainActivity : AppCompatActivity() {
         val currentLevel = getLevel(sharedPrefs.getStoredLevel())
         currentLevel?.let {
             sharedPrefs.storeLevel(
-                when(it) {
+                when (it) {
                     Level.BEGINNER -> Level.INTERMEDIATE
                     Level.INTERMEDIATE -> Level.ADVANCED
                     Level.ADVANCED -> Level.EXPERT
