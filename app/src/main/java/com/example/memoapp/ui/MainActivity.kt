@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
             btnQuit.visibility = gridVisible
         }
     }
-
+    
     private fun prepareCardView() {
         val currentLevel = getLevel(sharedPrefs.getStoredLevel()) ?: Level.BEGINNER
 
