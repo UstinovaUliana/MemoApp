@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.memoapp.R
 import com.example.memoapp.databinding.ActivityMainBinding
@@ -122,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendCommandToBoundervice(state: MusicState) {
+    private fun sendCommandToBoundService(state: MusicState) {
         if (mainViewModel.isMusicServiceBound) {
 
             informUser(state)
@@ -144,6 +145,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendCommandToForegroundService(timerState: TimerState) {
         mainViewModel.isForegroundServiceRunning = timerState != TimerState.STOP
+        ContextCompat.startForegroundService(this, getServiceIntent(timerState))
     }
 
     private fun getServiceIntent(command: TimerState) =
@@ -160,13 +162,13 @@ class MainActivity : AppCompatActivity() {
                 sendCommandToForegroundService(TimerState.START)
             }
             btnPlayMusic.onClick {
-                sendCommandToBoundervice(MusicState.PLAY)
+                sendCommandToBoundService(MusicState.PLAY)
             }
             btnPauseMusic.onClick {
-                sendCommandToBoundervice(MusicState.PAUSE)
+                sendCommandToBoundService(MusicState.PAUSE)
             }
             btnStopMusic.onClick {
-                sendCommandToBoundervice(MusicState.STOP)
+                sendCommandToBoundService(MusicState.STOP)
             }
             btnShuffleMusic.onClick {
                 getNameOfSong()
@@ -205,7 +207,7 @@ class MainActivity : AppCompatActivity() {
             btnQuit.visibility = gridVisible
         }
     }
-    
+
     private fun prepareCardView() {
         val currentLevel = getLevel(sharedPrefs.getStoredLevel()) ?: Level.BEGINNER
 
