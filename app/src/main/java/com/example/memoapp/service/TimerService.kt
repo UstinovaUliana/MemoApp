@@ -5,9 +5,12 @@ import android.content.Intent
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import com.example.memoapp.R
 import com.example.memoapp.helper.NotificationHelper
 import com.example.memoapp.helper.NotificationHelper.Companion.NOTIFICATION_ID
+import com.example.memoapp.helper.secondsToTime
 import com.example.memoapp.model.TimerState
+import com.example.memoapp.ui.TIMER_ACTION
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -78,9 +81,18 @@ class TimerService: Service(), CoroutineScope {
 
     private fun broadcastUpdate() {
         if (serviceState == TimerState.START) {
-            val elapseTime = (currentTime - startedAtTimestamp)
-        } else if (serviceState == TimerState.PAUSE) {
+            val elapsedTime = (currentTime - startedAtTimestamp)
+            sendBroadcast(
+                Intent(TIMER_ACTION)
+                    .putExtra(NOTIFICATION_TEXT, elapsedTime)
+            )
 
+            helper.updateNotification(
+                getString(R.string.time_is_running, elapsedTime.secondsToTime())
+            )
+
+        } else if (serviceState == TimerState.PAUSE) {
+            helper.updateNotification(getString(R.string.get_back))
         }
     }
 
