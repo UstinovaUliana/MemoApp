@@ -1,9 +1,6 @@
 package com.example.memoapp.ui
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.*
 import android.view.View
 import android.widget.Toast
@@ -43,6 +40,23 @@ class MainActivity : AppCompatActivity() {
     private val handler by lazy { Handler(Looper.getMainLooper()) }
 
     private val timerReceiver: TimerReceiver by lazy { TimerReceiver() }
+
+    private var musicService: MusicService? = null
+
+    private val boundServiceConnection = object : ServiceConnection {
+
+        override fun onServiceConnected(className: ComponentName?, service: IBinder?) {
+            val binder: MusicService.MusicBinder = service as MusicService.MusicBinder
+            musicService = binder.getService()
+            mainViewModel.isMusicServiceBound = true
+        }
+
+        override fun onServiceDisconnected(p0: ComponentName?) {
+            musicService?.runAction(MusicState.STOP)
+            musicService = null
+            mainViewModel.isMusicServiceBound = false
+        }
+    }
 
     inner class TimerReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -105,6 +119,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
+        if(!mainViewModel.isMusicServiceBound) bindToMusicService()
     }
 
     override fun onDestroy() {
