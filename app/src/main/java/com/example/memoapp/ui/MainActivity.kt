@@ -131,16 +131,22 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun bindToMusicService() {
+        Intent(this, MusicService::class.java).also {
+            bindService(it, boundServiceConnection, Context.BIND_AUTO_CREATE)
+        }
+    }
+
     private fun unbindMusicService() {
         if (mainViewModel.isMusicServiceBound) {
-
+            unbindService(boundServiceConnection)
             mainViewModel.isMusicServiceBound = false
         }
     }
 
     private fun sendCommandToBoundService(state: MusicState) {
         if (mainViewModel.isMusicServiceBound) {
-
+            musicService?.runAction(state)
             informUser(state)
             enableButtons(state)
         } else {
@@ -150,7 +156,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getNameOfSong() {
         val message = if (mainViewModel.isMusicServiceBound) {
-            getString(R.string.unknown)
+            musicService?.getNameOfSong() ?: getString(R.string.unknown)
         } else {
             getString(R.string.service_is_not_bound)
         }
